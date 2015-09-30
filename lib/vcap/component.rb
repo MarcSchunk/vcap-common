@@ -3,7 +3,6 @@ require "base64"
 require "eventmachine"
 require "monitor"
 require "set"
-require "thin"
 require 'multi_json'
 require "vcap/stats"
 
@@ -128,19 +127,19 @@ module VCAP
       end
 
       def start_http_server(host, port, auth, logger)
-        http_server = Thin::Server.new(host, port, :signals => false) do
-          Thin::Logging.silent = true
-          use Rack::Auth::Basic do |username, password|
-            [username, password] == auth
-          end
-          map '/healthz' do
-            run Healthz.new(logger)
-          end
-          map '/varz' do
-            run Varz.new(logger)
-          end
-        end
-        http_server.start!
+        # http_server = Thin::Server.new(host, port, :signals => false) do
+        #   Thin::Logging.silent = true
+        #   use Rack::Auth::Basic do |username, password|
+        #     [username, password] == auth
+        #   end
+        #   map '/healthz' do
+        #     run Healthz.new(logger)
+        #   end
+        #   map '/varz' do
+        #     run Varz.new(logger)
+        #   end
+        # end
+        # http_server.start!
       end
 
       def uuid
