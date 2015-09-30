@@ -5,7 +5,7 @@ require "monitor"
 require "nats/client"
 require "set"
 require "thin"
-require "yajl"
+require 'multi_json'
 require "vcap/stats"
 
 module VCAP
@@ -20,7 +20,7 @@ module VCAP
 
     def call(env)
       @logger.debug "varz access"
-      varz = Yajl::Encoder.encode(Component.updated_varz, :pretty => true, :terminator => "\n")
+      varz = MultiJson.dump(Component.updated_varz)
       [200, { 'Content-Type' => 'application/json', 'Content-Length' => varz.bytesize.to_s }, varz]
     rescue => e
       @logger.error "varz error #{e.inspect} #{e.backtrace.join("\n")}"
