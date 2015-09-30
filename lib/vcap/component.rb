@@ -2,7 +2,6 @@
 require "base64"
 require "eventmachine"
 require "monitor"
-require "nats/client"
 require "set"
 require "thin"
 require 'multi_json'
@@ -152,54 +151,55 @@ module VCAP
       # Returns the published configuration of the component,
       # including the ephemeral port and credentials.
       def register(opts)
-        disallow_exposing_of_config!(opts)
+        # return
+        # disallow_exposing_of_config!(opts)
 
-        uuid = VCAP.secure_uuid
-        type = opts[:type]
-        index = opts[:index]
-        uuid = "#{index}-#{uuid}" if index
-        host = opts[:host] || VCAP.local_ip
-        port = opts[:port] || VCAP.grab_ephemeral_port
-        nats = opts[:nats] || NATS
-        auth = [opts[:user] || VCAP.secure_uuid, opts[:password] || VCAP.secure_uuid]
-        logger = opts[:logger] || Logger.new(nil)
-        log_counter = opts[:log_counter]
+        # uuid = VCAP.secure_uuid
+        # type = opts[:type]
+        # index = opts[:index]
+        # uuid = "#{index}-#{uuid}" if index
+        # host = opts[:host] || VCAP.local_ip
+        # port = opts[:port] || VCAP.grab_ephemeral_port
+        # nats = opts[:nats] || NATS
+        # auth = [opts[:user] || VCAP.secure_uuid, opts[:password] || VCAP.secure_uuid]
+        # logger = opts[:logger] || Logger.new(nil)
+        # log_counter = opts[:log_counter]
 
-        # Discover message limited
-        @discover = {
-          :type => type,
-          :index => index,
-          :uuid => uuid,
-          :host => "#{host}:#{port}",
-          :credentials => auth,
-          :start => Time.now
-        }
+        # # Discover message limited
+        # @discover = {
+        #   :type => type,
+        #   :index => index,
+        #   :uuid => uuid,
+        #   :host => "#{host}:#{port}",
+        #   :credentials => auth,
+        #   :start => Time.now
+        # }
 
-        # Varz is customizable
-        varz.synchronize do
-          varz.merge!(@discover.dup)
-          varz[:num_cores] = VCAP.num_cores
-          varz[:log_counts] = log_counter if log_counter
-        end
+        # # Varz is customizable
+        # varz.synchronize do
+        #   varz.merge!(@discover.dup)
+        #   varz[:num_cores] = VCAP.num_cores
+        #   varz[:log_counts] = log_counter if log_counter
+        # end
 
-        @healthz = "ok\n".freeze
+        # @healthz = "ok\n".freeze
 
-        # Next steps require EM
-        raise "EventMachine reactor needs to be running" if !EventMachine.reactor_running?
+        # # Next steps require EM
+        # raise "EventMachine reactor needs to be running" if !EventMachine.reactor_running?
 
-        # Startup the http endpoint for /varz and /healthz
-        start_http_server(host, port, auth, logger)
+        # # Startup the http endpoint for /varz and /healthz
+        # start_http_server(host, port, auth, logger)
 
-        # Listen for discovery requests
-        nats.subscribe('vcap.component.discover') do |msg, reply|
-          update_discover_uptime
-          nats.publish(reply, @discover.to_json)
-        end
+        # # Listen for discovery requests
+        # nats.subscribe('vcap.component.discover') do |msg, reply|
+        #   update_discover_uptime
+        #   nats.publish(reply, @discover.to_json)
+        # end
 
-        # Also announce ourselves on startup..
-        nats.publish('vcap.component.announce', @discover.to_json)
+        # # Also announce ourselves on startup..
+        # nats.publish('vcap.component.announce', @discover.to_json)
 
-        @discover
+        # @discover
       end
 
       def update_discover_uptime
