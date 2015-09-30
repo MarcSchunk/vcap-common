@@ -1,6 +1,6 @@
 # Copyright (c) 2009-2011 VMware, Inc
 require 'rubygems'
-require 'yajl'
+require 'multi_json'
 require 'membrane'
 
 class JsonMessage
@@ -149,7 +149,7 @@ class JsonMessage
 
     raise ValidationError.new(missing_fields) unless missing_fields.empty?
 
-    Yajl::Encoder.encode(@msg)
+    MultiJson.dump(@msg)
   end
 
   def extract(opts = {})
